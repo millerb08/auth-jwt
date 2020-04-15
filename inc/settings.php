@@ -1,13 +1,5 @@
 <?php
 /*
- * Handle Exceptions
- */
-function exception_handler($e) {
-  die($e->getMessage());
-}
-set_exception_handler("exception_handler");
-
-/*
  * Set up database connection
  */
 try {

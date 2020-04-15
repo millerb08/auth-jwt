@@ -17,21 +17,11 @@
             <ul class="nav navbar-nav">
                 <li><a href="/">Home</a></li>
                 <li><a href="/books.php">Book List</a></li>
-                <?php if (isAuthenticated()) : ?>
-                  <li><a href="/add.php">Add Book</a></li>
-                <?php endif; ?>
+                <li><a href="/add.php">Add Book</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <?php if (isAuthenticated()) : ?>
-                <li><a href="/account.php">My Account</a></li>
-                <?php if (isAdmin()) : ?>
-                <li><a href="/admin.php">Admin</a></li>
-                <?php endif; ?>
-                <li><a href="/procedures/doLogout.php">Logout</a></li>
-                <?php else : ?>
                 <li><a href="/login.php">Login</a></li>
                 <li><a href="/register.php">Register</a></li>
-                <?php endif; ?>
             </ul>
         </div>
     </div>

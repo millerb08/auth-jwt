@@ -11,19 +11,16 @@
 
 namespace Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcacheSessionHandler;
 
 /**
  * @requires extension memcache
  * @group time-sensitive
- * @group legacy
  */
-class MemcacheSessionHandlerTest extends TestCase
+class MemcacheSessionHandlerTest extends \PHPUnit_Framework_TestCase
 {
     const PREFIX = 'prefix_';
     const TTL = 1000;
-
     /**
      * @var MemcacheSessionHandler
      */
@@ -33,15 +30,15 @@ class MemcacheSessionHandlerTest extends TestCase
 
     protected function setUp()
     {
-        if (\defined('HHVM_VERSION')) {
+        if (defined('HHVM_VERSION')) {
             $this->markTestSkipped('PHPUnit_MockObject cannot mock the Memcache class on HHVM. See https://github.com/sebastianbergmann/phpunit-mock-objects/pull/289');
         }
 
         parent::setUp();
-        $this->memcache = $this->getMockBuilder('Memcache')->getMock();
+        $this->memcache = $this->getMock('Memcache');
         $this->storage = new MemcacheSessionHandler(
             $this->memcache,
-            ['prefix' => self::PREFIX, 'expiretime' => self::TTL]
+            array('prefix' => self::PREFIX, 'expiretime' => self::TTL)
         );
     }
 
@@ -59,6 +56,12 @@ class MemcacheSessionHandlerTest extends TestCase
 
     public function testCloseSession()
     {
+        $this->memcache
+            ->expects($this->once())
+            ->method('close')
+            ->will($this->returnValue(true))
+        ;
+
         $this->assertTrue($this->storage->close());
     }
 
@@ -117,12 +120,12 @@ class MemcacheSessionHandlerTest extends TestCase
 
     public function getOptionFixtures()
     {
-        return [
-            [['prefix' => 'session'], true],
-            [['expiretime' => 100], true],
-            [['prefix' => 'session', 'expiretime' => 200], true],
-            [['expiretime' => 100, 'foo' => 'bar'], false],
-        ];
+        return array(
+            array(array('prefix' => 'session'), true),
+            array(array('expiretime' => 100), true),
+            array(array('prefix' => 'session', 'expiretime' => 200), true),
+            array(array('expiretime' => 100, 'foo' => 'bar'), false),
+        );
     }
 
     public function testGetConnection()

@@ -11,10 +11,9 @@
 
 namespace Symfony\Component\HttpFoundation\Tests\Session;
 
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
@@ -24,7 +23,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
  * @author Robert Schönthal <seroscho@googlemail.com>
  * @author Drak <drak@zikula.org>
  */
-class SessionTest extends TestCase
+class SessionTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface
@@ -70,27 +69,6 @@ class SessionTest extends TestCase
         $this->assertEquals('0123456789abcdef', $this->session->getId());
     }
 
-    public function testSetIdAfterStart()
-    {
-        $this->session->start();
-        $id = $this->session->getId();
-
-        $e = null;
-        try {
-            $this->session->setId($id);
-        } catch (\Exception $e) {
-        }
-
-        $this->assertNull($e);
-
-        try {
-            $this->session->setId('different');
-        } catch (\Exception $e) {
-        }
-
-        $this->assertInstanceOf('\LogicException', $e);
-    }
-
     public function testSetName()
     {
         $this->assertEquals('MOCKSESSID', $this->session->getName());
@@ -127,10 +105,10 @@ class SessionTest extends TestCase
 
     public function testReplace()
     {
-        $this->session->replace(['happiness' => 'be good', 'symfony' => 'awesome']);
-        $this->assertEquals(['happiness' => 'be good', 'symfony' => 'awesome'], $this->session->all());
-        $this->session->replace([]);
-        $this->assertEquals([], $this->session->all());
+        $this->session->replace(array('happiness' => 'be good', 'symfony' => 'awesome'));
+        $this->assertEquals(array('happiness' => 'be good', 'symfony' => 'awesome'), $this->session->all());
+        $this->session->replace(array());
+        $this->assertEquals(array(), $this->session->all());
     }
 
     /**
@@ -150,16 +128,16 @@ class SessionTest extends TestCase
         $this->session->set('hi', 'fabien');
         $this->session->set($key, $value);
         $this->session->clear();
-        $this->assertEquals([], $this->session->all());
+        $this->assertEquals(array(), $this->session->all());
     }
 
     public function setProvider()
     {
-        return [
-            ['foo', 'bar', ['foo' => 'bar']],
-            ['foo.bar', 'too much beer', ['foo.bar' => 'too much beer']],
-            ['great', 'symfony is great', ['great' => 'symfony is great']],
-        ];
+        return array(
+            array('foo', 'bar', array('foo' => 'bar')),
+            array('foo.bar', 'too much beer', array('foo.bar' => 'too much beer')),
+            array('great', 'symfony is great', array('great' => 'symfony is great')),
+        );
     }
 
     /**
@@ -170,14 +148,14 @@ class SessionTest extends TestCase
         $this->session->set('hi.world', 'have a nice day');
         $this->session->set($key, $value);
         $this->session->remove($key);
-        $this->assertEquals(['hi.world' => 'have a nice day'], $this->session->all());
+        $this->assertEquals(array('hi.world' => 'have a nice day'), $this->session->all());
     }
 
     public function testInvalidate()
     {
         $this->session->set('invalidate', 123);
         $this->session->invalidate();
-        $this->assertEquals([], $this->session->all());
+        $this->assertEquals(array(), $this->session->all());
     }
 
     public function testMigrate()
@@ -198,8 +176,6 @@ class SessionTest extends TestCase
     {
         $this->session->start();
         $this->session->save();
-
-        $this->assertFalse($this->session->isStarted());
     }
 
     public function testGetId()
@@ -216,7 +192,7 @@ class SessionTest extends TestCase
 
     public function testGetIterator()
     {
-        $attributes = ['hello' => 'world', 'symfony' => 'rocks'];
+        $attributes = array('hello' => 'world', 'symfony' => 'rocks');
         foreach ($attributes as $key => $val) {
             $this->session->set($key, $val);
         }
@@ -227,7 +203,7 @@ class SessionTest extends TestCase
             ++$i;
         }
 
-        $this->assertEquals(\count($attributes), $i);
+        $this->assertEquals(count($attributes), $i);
     }
 
     public function testGetCount()
@@ -241,33 +217,5 @@ class SessionTest extends TestCase
     public function testGetMeta()
     {
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Session\Storage\MetadataBag', $this->session->getMetadataBag());
-    }
-
-    public function testIsEmpty()
-    {
-        $this->assertTrue($this->session->isEmpty());
-
-        $this->session->set('hello', 'world');
-        $this->assertFalse($this->session->isEmpty());
-
-        $this->session->remove('hello');
-        $this->assertTrue($this->session->isEmpty());
-
-        $flash = $this->session->getFlashBag();
-        $flash->set('hello', 'world');
-        $this->assertFalse($this->session->isEmpty());
-
-        $flash->get('hello');
-        $this->assertTrue($this->session->isEmpty());
-    }
-
-    public function testSaveIfNotStarted()
-    {
-        $storage = $this->getMockBuilder('Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface')->getMock();
-        $session = new Session($storage);
-
-        $storage->expects($this->once())->method('isStarted')->willReturn(false);
-        $storage->expects($this->never())->method('save');
-        $session->save();
     }
 }

@@ -7,7 +7,7 @@ function getAllBooks()
     global $db;
 
     try {
-        $query = "SELECT books.*, COALESCE(SUM(votes.value),0) as score "
+        $query = "SELECT books.*, COALESCE(votes.value,0) as score "
             . " FROM books "
             . " LEFT JOIN votes ON (books.id = votes.book_id) "
             . " GROUP BY books.id "
