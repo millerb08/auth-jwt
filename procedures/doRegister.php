@@ -18,5 +18,6 @@ if(!empty($user)){
 
 $hashed = password_hash($password, PASSWORD_DEFAULT);
 $user = createUser($username, $hashed);
+saveUSerSession($user);
 $session->getFlashBag()->add("success", "User Added");
 redirect("/");

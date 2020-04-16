@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/inc/bootstrap.php';
+requireAuth();
 require_once __DIR__ . '/templates/header.php';
 require_once __DIR__ . '/templates/nav.php';
 ?>
