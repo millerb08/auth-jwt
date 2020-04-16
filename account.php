@@ -10,8 +10,8 @@ require_once __DIR__ . '/templates/nav.php';
         <form class="form-signin" method="post" action="/procedures/changePassword.php">
             <h2 class="form-signin-heading">My Account</h2>
             <h4>Change Password</h4>
-            <label for="inputCurrentPassword" class="sr-only">Current Password</label>
-            <input type="password" id="inputCurrentPassword" name="current_password" class="form-control" placeholder="Current Password" required autofocus>
+            <label for="inputCurrentPasword" class="sr-only">Current Password</label>
+            <input type="password" id="inputCurrentPasword" name="current_password" class="form-control" placeholder="Current Pasword" required autofocus>
             <br>
             <label for="inputPassword" class="sr-only">New Password</label>
             <input type="password" id="inputPassword" name="password" class="form-control" placeholder="New Password" required>
