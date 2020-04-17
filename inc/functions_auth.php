@@ -15,7 +15,7 @@ function requireAuth()
 }
 
 function isAdmin(){
-  if(!isAisAuthenticated()){
+  if(!isAuthenticated()){
     return false;
   }
   global $session;
@@ -25,7 +25,7 @@ function isAdmin(){
 function requireAdmin(){
   if(!isAdmin()){
     global $session;
-    $session->getFlashBag->add("error","Not Authorized");
+    $session->getFlashBag()->add("error","Not Authorized");
     redirect("/login.php");
   }
 }
@@ -35,7 +35,7 @@ function isOwner($ownerId){
     return false;
   }
   global $session;
-  return $session->get("auth_user_id");
+  return $ownerId == $session->get("auth_user_id");
 }
 
 function getAuthenticatedUser(){
