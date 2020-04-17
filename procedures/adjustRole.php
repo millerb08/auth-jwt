@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__."/../inc/bootstrap.php";
+requireAdmin();
 
 $user=changeRole(request()->get("userId"),request()->get("roleId"));
 if($user["role_id"] == 1){
