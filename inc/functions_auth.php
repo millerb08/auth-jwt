@@ -43,12 +43,20 @@ function saveUserData($user)
 {
   global $session;
   $session->getFlashBag()->add('success', 'Successfully Logged In');
-  $data = [
-    "auth_user_id" => (int) $user['id'],
-    "auth_roles" => (int) $user['role_id']
-  ];
   $expTime = time() + 3600; //3600 secods 1 hour
-  $cookie = setAuthCookie(json_encode($data),$expTime);
+  $jwt = Firebase\JWT\JWT::encode(
+     [
+        "iss" => request()->getBaseUrl(), //issuer
+        "sub" => (int) $user['id'], //subject
+        "exp" => $expTime, //expiration time
+        "iat" => time(), //issued at (the when was emited)
+        "nbf" => time(), //not before (when the token is not accepted)
+        "auth_roles" => (int) $user['role_id']
+    ],
+    getenv("SECRET_KEY"),
+    "HS256"
+  );  
+  $cookie = setAuthCookie($jwt,$expTime);
   redirect("/", ["cookies" => [$cookie]]);
 }
 
@@ -66,9 +74,21 @@ function setAuthCookie($data, $expTime){
 }
 
 function decodeAuthCookie($prop = NULL){
-  $cookie = json_decode(request()->cookies->get("auth"));
+  try{
+    Firebase\JWT\JWT::$leeway=1;
+    $cookie = Firebase\JWT\JWT::decode(
+      request()->cookies->get("auth"), //cookie o JWT to decode
+      getenv("SECRET_KEY"), //SECRET KEY to encode
+      ["HS256"] //crypto sistem method to encode and decode
+    );
+  }catch(Exception $e){
+    return false;
+  }
   if($prop === NULL){
     return $cookie;
+  }
+  if($prop == "auth_user_id"){
+    $pro = "sub";
   }
   if(!isset($cookie->$prop)){
     return false;
