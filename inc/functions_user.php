@@ -1,57 +1,99 @@
 <?php
-function isAuthenticated()
+/*
+ * Functions to interface with `user` table
+ */
+function getAllUsers()
 {
-  global $session;
-  return $session->get('auth_logged_in', false);
-}
+    global $db;
 
-function requireAuth()
+    try {
+        $query = "SELECT * FROM users";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    } catch (\Exception $e) {
+        throw $e;
+    }
+}
+function findUserByUsername($username)
 {
-  if (!isAuthenticated()) {
-    global $session;
-    $session->getFlashBag()->add('error', 'Not Authorized');
-    redirect('/login.php');
-  }
-}
+    global $db;
 
-function isAdmin(){
-  if(!isAuthenticated()){
-    return false;
-  }
-  global $session;
-  return $session->get("auth_roles") === 1;
-}
+    try {
+        $query = "SELECT * FROM users WHERE username = :username";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+        return $stmt->fetch();
 
-function requireAdmin(){
-  if(!isAdmin()){
-    global $session;
-    $session->getFlashBag()->add("error","Not Authorized");
-    redirect("/login.php");
-  }
+    } catch (\Exception $e) {
+        throw $e;
+    }
 }
-
-function isOwner($ownerId){
-  if(!isAuthenticated()){
-    return false;
-  }
-  global $session;
-  return $ownerId == $session->get("auth_user_id");
-}
-
-function getAuthenticatedUser(){
-  global $session;
-  return findUserById($session->get("auth_user_id"));
-}
-
-function saveUserData($user)
+function findUserById($userId)
 {
-  global $session;
-  $session->set('auth_logged_in', true);
-  $session->set('auth_user_id', (int) $user['id']);
-  $session->set('auth_roles', (int) $user['role_id']);
-  
-  $session->getFlashBag()->add('success', 'Successfully Logged In');
-  $cookieId = new Symfony\Component\HttpFoundation\Cookie("auth_user_id",(int) $user['id']);
-  $cookieRoles = new Symfony\Component\HttpFoundation\Cookie("auth_roles",(int) $user['role_id']);
-  redirect("/", ["cookies" => [$cookieId, $cookieRoles]]);
+    global $db;
+
+    try {
+        $query = "SELECT * FROM users WHERE id = :userId";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+        return $stmt->fetch();
+
+    } catch (\Exception $e) {
+        throw $e;
+    }
+}
+function createUser($username, $password)
+{
+    global $db;
+
+    try {
+        $query = "INSERT INTO users (username, password, role_id) VALUES (:username, :password, 2)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':password', $password);
+        $stmt->execute();
+        return findUserByUsername($username);
+    } catch (\Exception $e) {
+        throw $e;
+    }
+}
+function updatePassword($password, $userId)
+{
+    global $db;
+
+    try {
+        $query = 'UPDATE users SET password = :password WHERE id = :userId';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':password', $password);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+        if ($stmt->rowCount() > 0) {
+          return true;
+        } else {
+          return false;
+        }
+    } catch (\Exception $e) {
+        throw $e;
+    }
+
+    return true;
+}
+
+function changeRole($userId, $roleId)
+{
+    global $db;
+
+    try {
+        $query = "UPDATE users SET role_id = :roleId WHERE id = :userId";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':roleId', $roleId);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+        return findUserById($userId);
+    } catch (\Exception $e) {
+        throw $e;
+    }
 }
